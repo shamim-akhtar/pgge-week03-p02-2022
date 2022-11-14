@@ -4,22 +4,34 @@ using UnityEngine;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
-  // We only keep reference the base class.
-  // And use polyorphism to determind at the runtime
-  // what actual camera we using.
-  private TPC mTpc;
+  [SerializeField]
+  Transform mPlayer;
+  [SerializeField]
+  Vector3 CameraOffsetPos = Vector3.zero;
+  [SerializeField]
+  Vector3 CameraOffsetRot = Vector3.zero;
+  [SerializeField]
+  float DampingFactor = 5.0f;
 
-  public Transform mPlayer;
+  TPC mTpc;
 
   // Start is called before the first frame update
   void Start()
   {
-    mTpc = new TPCTrack(mPlayer, transform);
+    CameraConstants.DampingFactor = DampingFactor;
+    CameraConstants.CameraPositionOffset = CameraOffsetPos;
+    CameraConstants.CameraRotationOffset = CameraOffsetRot;
+
+    //mTpc = new TPCTrack(transform, mPlayer);
+    mTpc = new TPCFollowTrackPosAndRotation(transform, mPlayer);
   }
 
   // Update is called once per frame
   void Update()
   {
+    CameraConstants.DampingFactor = DampingFactor;
+    CameraConstants.CameraPositionOffset = CameraOffsetPos;
+    CameraConstants.CameraRotationOffset = CameraOffsetRot;
 
   }
 
