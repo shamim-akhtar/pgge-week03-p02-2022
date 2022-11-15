@@ -12,6 +12,14 @@ public class ThirdPersonCamera : MonoBehaviour
   Vector3 CameraOffsetRot = Vector3.zero;
   [SerializeField]
   float DampingFactor = 5.0f;
+  [SerializeField]
+  float RotationSpeed = 20.0f;
+  [SerializeField]
+  float MinPitch = 0.0f;
+  [SerializeField]
+  float MaxPitch = 20.0f;
+  [SerializeField]
+  FixedTouchField mTouchField;
 
   TPC mTpc;
 
@@ -23,7 +31,8 @@ public class ThirdPersonCamera : MonoBehaviour
     CameraConstants.CameraRotationOffset = CameraOffsetRot;
 
     //mTpc = new TPCTrack(transform, mPlayer);
-    mTpc = new TPCFollowTrackPosAndRotation(transform, mPlayer);
+    //mTpc = new TPCFollowTrackPosAndRotation(transform, mPlayer);
+    mTpc = new TPCIndependent(transform, mPlayer, mTouchField);
   }
 
   // Update is called once per frame
@@ -32,6 +41,9 @@ public class ThirdPersonCamera : MonoBehaviour
     CameraConstants.DampingFactor = DampingFactor;
     CameraConstants.CameraPositionOffset = CameraOffsetPos;
     CameraConstants.CameraRotationOffset = CameraOffsetRot;
+    CameraConstants.RotationSpeed = RotationSpeed;
+    CameraConstants.MinPitch = MinPitch;
+    CameraConstants.MaxPitch = MaxPitch;
 
   }
 

@@ -7,6 +7,9 @@ public class CameraConstants
   public static Vector3 CameraPositionOffset = Vector3.zero;
   public static Vector3 CameraRotationOffset = Vector3.zero;
   public static float DampingFactor = 2.0f;
+  public static float RotationSpeed = 20.0f;
+  public static float MinPitch = 0.0f;
+  public static float MaxPitch = 80.0f;
 }
 
 // We want to implement third-persn camera that is not associated
@@ -99,5 +102,59 @@ public class TPCFollowTrackPosAndRotation : TPCFollow
     Quaternion initialRotation = Quaternion.Euler(CameraConstants.CameraRotationOffset);
     mCamera.rotation = Quaternion.Lerp(mCamera.rotation, mPlayer.rotation * initialRotation, Time.deltaTime * CameraConstants.DampingFactor);
     base.Calculate();
+  }
+}
+
+
+public class TPCIndependent : TPC
+{
+  FixedTouchField mTouchField;
+  private float angleX = 0.0f;
+
+  public TPCIndependent(Transform camera, Transform player)
+    : base(camera, player)
+  {
+    mTouchField = null;
+  }
+  public TPCIndependent(Transform camera, Transform player, FixedTouchField ftf)
+    : base(camera, player)
+  {
+    mTouchField = ftf;
+  }
+
+  public override void Calculate()
+  {
+    float mx, my;
+    mx = mTouchField.TouchDist.x * Time.deltaTime;
+    my = mTouchField.TouchDist.y * Time.deltaTime;
+    Quaternion initialRotation = Quaternion.Euler(CameraConstants.CameraRotationOffset);
+
+    Vector3 eu = mCamera.rotation.eulerAngles;
+
+    angleX -= my * CameraConstants.RotationSpeed;
+
+    // We clamp the angle along the Xaxis to be between the min and max pitch.
+    angleX = Mathf.Clamp(angleX, CameraConstants.MinPitch, CameraConstants.MaxPitch);
+
+    eu.y += mx * CameraConstants.RotationSpeed;
+    Quaternion newRot = Quaternion.Euler(angleX, eu.y, 0.0f) * initialRotation;
+
+    mCamera.rotation = newRot;
+
+    Vector3 forward = mCamera.rotation * Vector3.forward;
+    Vector3 right = mCamera.rotation * Vector3.right;
+    Vector3 up = mCamera.rotation * Vector3.up;
+
+    // we then calculate the target position of the camera.
+    Vector3 targetPos = mPlayer.position;
+
+    Vector3 desiredPos = targetPos
+      + forward * CameraConstants.CameraPositionOffset.z
+      + right * CameraConstants.CameraPositionOffset.x
+      + up * CameraConstants.CameraPositionOffset.y;
+
+    // finaly lets lerp the movement.
+    mCamera.position = Vector3.Lerp(mCamera.position, desiredPos, Time.deltaTime * CameraConstants.DampingFactor);
+
   }
 }
